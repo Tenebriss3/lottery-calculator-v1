@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>六合彩下注管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- SheetJS for Excel operations -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部状态栏 -->
+        <header class="header">
+            <div class="header-title">📊 六合彩下注管理系统</div>
+            <div class="date-display" id="currentDate"></div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">总收款</span>
+                    <span class="stat-value" id="totalReceived">¥0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">总赔付</span>
+                    <span class="stat-value" id="totalPayout">¥0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">盈亏</span>
+                    <span class="stat-value" id="profit">¥0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 左侧:聊天粘贴区 -->
+            <section class="chat-section">
+                <h2 class="section-title">💬 聊天记录粘贴区</h2>
+                <textarea
+                    id="chatInput"
+                    placeholder="在此粘贴客户下注聊天记录...&#10;&#10;支持的格式:&#10;• 平特蛇2000 | 26.38.41各15米 | 包猪各25&#10;• 25.=50米 | 特码01,02每个数5蚊&#10;• 28.08.38各五 | 07.16各十 | 14.三十五&#10;&#10;提示: 数字=号码,中文=金额(五=5元,十=10元)"
+                ></textarea>
+                <div class="button-row">
+                    <button class="btn btn-primary" id="parseBtn">🔍 智能解析</button>
+                    <button class="btn btn-success" id="confirmBtn" style="display:none;">✅ 确认添加</button>
+                    <button class="btn btn-secondary" id="clearBtn">🗑️ 清空输入</button>
+                </div>
+                
+                <!-- 解析预览区 -->
+                <div class="preview-section" id="previewSection" style="display:none;">
+                    <h3 class="preview-title">👁️ 解析预览 (点击确认添加)</h3>
+                    <div class="preview-content">
+                        <div class="preview-stats">
+                            <span>识别记录: <strong id="previewCount">0</strong> 条</span>
+                            <span>总金额: <strong id="previewAmount">¥0</strong></span>
+                        </div>
+                        <div class="preview-list" id="previewList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧:已录入数据展示区 -->
+            <section class="results-section">
+                <div class="results-header" id="resultsHeader">
+                    <h2 class="section-title">📋 已录入数据</h2>
+                    <span class="toggle-icon" id="toggleIcon">▼</span>
+                </div>
+                <div class="results-content" id="resultsContent">
+                    <!-- 操作按钮 -->
+                    <div class="result-card action-card">
+                        <button class="btn btn-sm btn-danger" id="clearAllBtn">🗑️ 清空全部</button>
+                        <span class="hint-text">点击记录可编辑/删除</span>
+                    </div>
+
+                    <!-- 号码统计表 -->
+                    <div class="result-card">
+                        <h3>🔢 号码统计</h3>
+                        <div class="table-container">
+                            <table id="numberStatsTable">
+                                <thead>
+                                    <tr>
+                                        <th>号码</th>
+                                        <th>出现次数</th>
+                                        <th>累计金额</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="numberStatsBody">
+                                    <tr><td colspan="3" class="empty-msg">暂无数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 生肖投注表 -->
+                    <div class="result-card">
+                        <h3>🐉 生肖投注</h3>
+                        <div class="table-container">
+                            <table id="zodiacTable">
+                                <thead>
+                                    <tr>
+                                        <th>生肖</th>
+                                        <th>对应号码</th>
+                                        <th>金额</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="zodiacBody">
+                                    <tr><td colspan="3" class="empty-msg">暂无数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 下注明细 (可编辑) -->
+                    <div class="result-card">
+                        <h3>📝 下注明细 (点击可编辑/删除)</h3>
+                        <div class="table-container">
+                            <table id="betDetailsTable">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>号码/生肖</th>
+                                        <th>金额</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="betDetailsBody">
+                                    <tr><td colspan="4" class="empty-msg">暂无数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 底部:盈亏核算区 -->
+        <footer class="footer">
+            <div class="payout-section">
+                <h3>💰 盈亏核算</h3>
+                
+                <!-- 赔率设置 -->
+                <div class="payout-rate-setting">
+                    <label for="payoutRate">赔率设置:</label>
+                    <div class="rate-input-group">
+                        <span>1 :</span>
+                        <input type="number" id="payoutRate" value="47" min="1" max="999">
+                    </div>
+                    <button class="btn btn-sm btn-info" id="saveRateBtn">💾 保存</button>
+                </div>
+
+                <div class="input-group">
+                    <label for="winningNumbers">今日开奖号码 (用逗号或空格分隔):</label>
+                    <input
+                        type="text"
+                        id="winningNumbers"
+                        placeholder="例如: 07,19,31,43"
+                    >
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-success" id="calculateBtn">📊 计算盈亏</button>
+                    <button class="btn btn-info" id="exportExcelBtn">📥 导出Excel</button>
+                    <button class="btn btn-warning" id="exportTextBtn">💾 文本备份</button>
+                    <button class="btn btn-secondary" id="importBtn">📤 导入数据</button>
+                    <button class="btn btn-danger" id="archiveBtn">📦 归档今日数据</button>
+                </div>
+                <div class="payout-result" id="payoutResult" style="display:none;">
+                    <div class="payout-item">
+                        <span>今日总投注:</span>
+                        <span id="payoutTotalBet">¥0</span>
+                    </div>
+                    <div class="payout-item">
+                        <span>需赔付总额:</span>
+                        <span id="payoutTotalPayout">¥0</span>
+                    </div>
+                    <div class="payout-item highlight">
+                        <span>今日盈亏:</span>
+                        <span id="payoutProfit">¥0</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- 隐藏的文件输入 -->
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.txt,.json" style="display:none;">
+    </div>
+
+    <!-- JavaScript模块 -->
+    <script src="js/config.js"></script>
+    <script src="js/parser.js"></script>
+    <script src="js/calculator.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/exporter.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

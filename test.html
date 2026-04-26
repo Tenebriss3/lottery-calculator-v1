@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试 - 智能解析引擎</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 12px 24px;
+            background: #3742fa;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #2d3561;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #3742fa;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #3742fa;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .success {
+            color: #2ed573;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff4757;
+            font-weight: bold;
+        }
+        pre {
+            background: #1a1a2e;
+            color: #eee;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 智能解析引擎测试</h1>
+
+    <div class="test-section">
+        <h2>测试用例: 示例聊天记录</h2>
+        <textarea id="testInput">平特蛇2000，新澳 26.38.41.30.20.31.34.27各15米。33%27%17%29%41%05%35%39%31各10米。25.=50米
+27.33.43.32.各20米
+11.22.47.17.41.15.21.37.42.49.44.31.14.39各5米。包猪各25
+新奥： 特码01,02,06,07,08,09,10,13,15,16,20,21,22,28,45,49每个数5蚊
+22.34.46.12.24.48各20
+05.17.29.01.13.25.37.49.11.23.35各10</textarea>
+        <br>
+        <button onclick="runTest()">▶️ 运行测试</button>
+        <button onclick="clearResults()">🗑️ 清空结果</button>
+    </div>
+
+    <div class="test-section" id="results" style="display:none;">
+        <h2>测试结果</h2>
+        <div id="resultContent"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/parser.js"></script>
+    <script>
+        function runTest() {
+            const input = document.getElementById('testInput').value;
+            const resultsDiv = document.getElementById('results');
+            const resultContent = document.getElementById('resultContent');
+
+            try {
+                // 执行解析
+                const result = parser.parse(input);
+
+                // 生成结果HTML
+                let html = `
+                    <div class="result">
+                        <h3 class="success">✅ 解析成功!</h3>
+                        <p><strong>识别记录数:</strong> ${result.bets.length} 条</p>
+                        <p><strong>总收款:</strong> ${formatMoney(parser.getTotalReceived())}</p>
+                    </div>
+
+                    <h3>📊 下注明细</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>类型</th>
+                                <th>号码/生肖</th>
+                                <th>金额</th>
+                                <th>原始记录</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                result.bets.forEach((bet, index) => {
+                    const typeLabel = bet.type === 'zodiac' ? '生肖' :
+                                    bet.type === 'batch' ? '批量' :
+                                    bet.type === 'special' ? '特码' : '单号';
+
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${typeLabel}</td>
+                            <td>${bet.zodiac || bet.numbers.map(n => formatNumber(n)).join(', ')}</td>
+                            <td>${formatMoney(bet.amount)}</td>
+                            <td>${bet.rawText}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+
+                    <h3>🔢 号码统计 (前20个)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>号码</th>
+                                <th>出现次数</th>
+                                <th>累计金额</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                Object.entries(result.numberStats)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .slice(0, 20)
+                    .forEach(([number, stats]) => {
+                        html += `
+                            <tr>
+                                <td>${number}</td>
+                                <td>${stats.count}</td>
+                                <td>${formatMoney(stats.totalAmount)}</td>
+                            </tr>
+                        `;
+                    });
+
+                html += `
+                        </tbody>
+                    </table>
+
+                    <h3>🐉 生肖投注</h3>
+                `;
+
+                if (result.zodiacBets.length > 0) {
+                    html += `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>生肖</th>
+                                    <th>对应号码</th>
+                                    <th>金额</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    result.zodiacBets.forEach(bet => {
+                        html += `
+                            <tr>
+                                <td>${bet.zodiac}</td>
+                                <td>${bet.numbers.map(n => formatNumber(n)).join(', ')}</td>
+                                <td>${formatMoney(bet.amount)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    html += '<p>无生肖投注</p>';
+                }
+
+                html += `
+                    <h3>📦 完整JSON数据</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+
+                resultContent.innerHTML = html;
+                resultsDiv.style.display = 'block';
+
+            } catch (error) {
+                resultContent.innerHTML = `
+                    <div class="result">
+                        <h3 class="error">❌ 解析失败</h3>
+                        <p>${error.message}</p>
+                        <pre>${error.stack}</pre>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('resultContent').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

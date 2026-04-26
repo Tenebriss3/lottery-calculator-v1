@@ -1,0 +1,110 @@
+{
+  "exportDate": "2026-04-26 15:30:00",
+  "currentDay": {
+    "date": "2026-04-26",
+    "bets": [
+      {
+        "id": 1,
+        "type": "zodiac",
+        "zodiac": "蛇",
+        "numbers": [2, 14, 26, 38],
+        "amount": 2000,
+        "rawText": "平特蛇2000",
+        "timestamp": "2026-04-26 14:30:00"
+      },
+      {
+        "id": 2,
+        "type": "batch",
+        "numbers": [26, 38, 41, 30, 20, 31, 34, 27],
+        "amount": 120000,
+        "rawText": "新澳 26.38.41.30.20.31.34.27各15米",
+        "timestamp": "2026-04-26 14:30:01"
+      },
+      {
+        "id": 3,
+        "type": "single",
+        "numbers": [25],
+        "amount": 50000,
+        "rawText": "25.=50米",
+        "timestamp": "2026-04-26 14:30:02"
+      },
+      {
+        "id": 4,
+        "type": "batch",
+        "numbers": [27, 33, 43, 32],
+        "amount": 80000,
+        "rawText": "27.33.43.32.各20米",
+        "timestamp": "2026-04-26 14:30:03"
+      },
+      {
+        "id": 5,
+        "type": "zodiac",
+        "zodiac": "猪",
+        "numbers": [8, 20, 32, 44],
+        "amount": 100000,
+        "rawText": "包猪各25",
+        "timestamp": "2026-04-26 14:30:04"
+      }
+    ],
+    "numberStats": {
+      "02": {"count": 1, "totalAmount": 500},
+      "14": {"count": 1, "totalAmount": 500},
+      "26": {"count": 2, "totalAmount": 15500},
+      "38": {"count": 2, "totalAmount": 15500},
+      "41": {"count": 1, "totalAmount": 15000},
+      "30": {"count": 1, "totalAmount": 15000},
+      "20": {"count": 2, "totalAmount": 40000},
+      "31": {"count": 1, "totalAmount": 15000},
+      "34": {"count": 1, "totalAmount": 15000},
+      "27": {"count": 2, "totalAmount": 35000},
+      "25": {"count": 1, "totalAmount": 50000},
+      "33": {"count": 1, "totalAmount": 20000},
+      "43": {"count": 1, "totalAmount": 20000},
+      "32": {"count": 2, "totalAmount": 45000},
+      "08": {"count": 1, "totalAmount": 25000},
+      "44": {"count": 1, "totalAmount": 25000}
+    },
+    "zodiacBets": [
+      {
+        "id": 1,
+        "type": "zodiac",
+        "zodiac": "蛇",
+        "numbers": [2, 14, 26, 38],
+        "amount": 2000,
+        "rawText": "平特蛇2000",
+        "timestamp": "2026-04-26 14:30:00"
+      },
+      {
+        "id": 5,
+        "type": "zodiac",
+        "zodiac": "猪",
+        "numbers": [8, 20, 32, 44],
+        "amount": 100000,
+        "rawText": "包猪各25",
+        "timestamp": "2026-04-26 14:30:04"
+      }
+    ],
+    "winningNumbers": [7, 19, 31],
+    "profitResult": {
+      "totalReceived": 252000,
+      "totalPayout": 15000,
+      "profit": 237000,
+      "winningBets": [
+        {
+          "betId": 2,
+          "numbers": [31],
+          "payout": 15000,
+          "rawText": "新澳 26.38.41.30.20.31.34.27各15米"
+        }
+      ]
+    }
+  },
+  "history": [
+    {
+      "date": "2026-04-25",
+      "bets": [],
+      "winningNumbers": [5, 17, 29],
+      "archivedAt": "2026-04-25 18:00:00"
+    }
+  ]
+}

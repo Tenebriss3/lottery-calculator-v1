@@ -1,0 +1,13 @@
+{
+  "name": "lottery-betting-tool",
+  "version": "1.0.0",
+  "description": "直接在浏览器中打开 `index.html` 文件即可使用。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

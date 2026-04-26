@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>解析调试</title>
+</head>
+<body>
+    <h1>特码解析调试</h1>
+    <textarea id="input" rows="5" cols="80">新奥： 特码01,02,06,07,08,09,10,13,15,16,20,21,22,28,45,49每个数5蚊</textarea>
+    <br>
+    <button onclick="testParse()">测试解析</button>
+    <pre id="result"></pre>
+
+    <script src="js/config.js"></script>
+    <script src="js/parser.js"></script>
+    <script>
+        function testParse() {
+            const input = document.getElementById('input').value;
+            const result = document.getElementById('result');
+            
+            // 测试正则
+            const pattern = /特码[\s:：]*([0-9,\s.%]+?)\s*每个数\s*(\d+)(米|蚊|块|元)?/;
+            const match = input.match(pattern);
+            
+            let output = '=== 正则匹配结果 ===\n';
+            if (match) {
+                output += '匹配成功!\n';
+                output += `完整匹配: ${match[0]}\n`;
+                output += `号码部分: ${match[1]}\n`;
+                output += `金额: ${match[2]}\n`;
+                output += `单位: ${match[3] || '无'}\n\n`;
+                
+                // 测试号码提取
+                const numbersStr = match[1];
+                const normalized = numbersStr.replace(/[.%，,\s]+/g, ' ');
+                const numMatches = normalized.match(/\d{1,2}/g);
+                
+                output += '=== 号码提取 ===\n';
+                output += `原始字符串: ${numbersStr}\n`;
+                output += `标准化后: ${normalized}\n`;
+                output += `提取的号码: ${numMatches ? numMatches.join(', ') : '无'}\n`;
+                
+                if (numMatches) {
+                    const numbers = numMatches
+                        .map(n => parseInt(n))
+                        .filter(n => n >= 1 && n <= 49)
+                        .filter((n, i, self) => self.indexOf(n) === i);
+                    output += `有效号码: ${numbers.join(', ')}\n`;
+                    output += `号码数量: ${numbers.length}\n`;
+                }
+            } else {
+                output += '❌ 匹配失败!\n';
+                output += '尝试其他模式...\n\n';
+                
+                // 尝试更宽松的模式
+                const pattern2 = /特码.*?每个数\s*(\d+)/;
+                const match2 = input.match(pattern2);
+                if (match2) {
+                    output += `宽松模式匹配成功: ${match2[0]}\n`;
+                } else {
+                    output += '宽松模式也失败了\n';
+                }
+            }
+            
+            // 测试完整解析
+            output += '\n=== 完整解析测试 ===\n';
+            const parserResult = parser.parse(input);
+            output += `识别记录数: ${parserResult.bets.length}\n`;
+            if (parserResult.bets.length > 0) {
+                parserResult.bets.forEach((bet, i) => {
+                    output += `\n记录${i+1}:\n`;
+                    output += `  类型: ${bet.type}\n`;
+                    output += `  号码: ${bet.numbers.join(', ')}\n`;
+                    output += `  金额: ${bet.amount}\n`;
+                    output += `  原文: ${bet.rawText}\n`;
+                });
+            } else {
+                output += '❌ 没有识别到任何记录\n';
+            }
+            
+            result.textContent = output;
+        }
+    </script>
+</body>
+</html>
